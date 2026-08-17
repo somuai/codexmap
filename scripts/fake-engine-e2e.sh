@@ -4,6 +4,7 @@ set -euo pipefail
 export CODEXMAP_DISABLE_AUTH=true
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export NODE_PATH="$ROOT/node_modules:${NODE_PATH:-}"
 TMP_DIR="$(mktemp -d)"
 LOG_FILE="$TMP_DIR/codexmap.log"
 HTTP_PORT="${CODEXMAP_E2E_HTTP_PORT:-38333}"
@@ -36,7 +37,11 @@ for _ in $(seq 1 30); do
   sleep 1
 done
 
-curl -fsS "http://127.0.0.1:$HTTP_PORT/api/health" >/dev/null
+if ! curl -fsS "http://127.0.0.1:$HTTP_PORT/api/health" >/dev/null 2>&1; then
+  echo "--- codexmap log on health check failure ---" >&2
+  cat "$LOG_FILE" >&2
+  exit 1
+fi
 curl -fsS "http://127.0.0.1:$HTTP_PORT/api/session" >/dev/null
 
 for _ in $(seq 1 30); do
