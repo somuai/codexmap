@@ -24,9 +24,12 @@
   "scripts": {
     "start": "node bin/codexmap.js",
     "doctor": "node bin/codexmap.js doctor",
-    "test": "node scripts/unit-tests.js",
+    "check": "node scripts/check-js.js",
     "check-js": "node scripts/check-js.js",
+    "test": "node scripts/unit-tests.js",
     "test:e2e": "bash scripts/fake-engine-e2e.sh",
+    "test:e2e:fake": "bash scripts/fake-engine-e2e.sh",
+    "pack:smoke": "bash scripts/package-smoke-test.sh",
     "release:preflight": "bash scripts/release-preflight.sh"
   },
   "keywords": [
