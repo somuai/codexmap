@@ -1,0 +1,51 @@
+{
+  "name": "codexmap",
+  "version": "0.1.0-alpha.1",
+  "description": "Real-time self-healing multi-agent cockpit for code generation & context drift prevention",
+  "author": "Soumyajit Ghosh <somuai>",
+  "license": "MIT",
+  "main": "serve.js",
+  "bin": {
+    "codexmap": "./bin/codexmap.js",
+    "map": "./bin/codexmap.js"
+  },
+  "files": [
+    "agents",
+    "bin",
+    "engines",
+    "lib",
+    "ui",
+    "scripts",
+    "serve.js",
+    "orchestrator.js",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "node bin/codexmap.js",
+    "doctor": "node bin/codexmap.js doctor",
+    "test": "node scripts/unit-tests.js",
+    "check-js": "node scripts/check-js.js",
+    "test:e2e": "bash scripts/fake-engine-e2e.sh",
+    "release:preflight": "bash scripts/release-preflight.sh"
+  },
+  "keywords": [
+    "agentic-ai",
+    "multi-agent-systems",
+    "code-generation",
+    "self-healing",
+    "context-drift",
+    "ast",
+    "cytoscape",
+    "gemini-api",
+    "developer-tools",
+    "devtools"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "cytoscape": "^3.28.1",
+    "ws": "^8.16.0"
+  }
+}
