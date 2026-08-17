@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodexMap | Agentic Codebase Intelligence</title>
+  <script>
+    console.log('[INDEX] Booting CodexMap UI...');
+  </script>
+  <script>
+    // Security Interceptors for CodexMap Local Sidecar
+    (function() {
+      const originalFetch = window.fetch;
+      window.fetch = function(input, init) {
+        let isSidecarCall = false;
+        if (typeof input === 'string') {
+          isSidecarCall = input.startsWith('/api/') || 
+                          input.startsWith('/reheal') || 
+                          input.startsWith('/reanchor') || 
+                          input.startsWith('/set-target') || 
+                          input.startsWith('/ls') || 
+                          input.startsWith('/browse');
+        }
+        if (isSidecarCall && window.__CODEXMAP_TOKEN__) {
+          init = init || {};
+          init.headers = init.headers || {};
+          if (init.headers instanceof Headers) {
+            init.headers.set('Authorization', 'Bearer ' + window.__CODEXMAP_TOKEN__);
+          } else if (Array.isArray(init.headers)) {
+            init.headers.push(['Authorization', 'Bearer ' + window.__CODEXMAP_TOKEN__]);
+          } else {
+            init.headers['Authorization'] = 'Bearer ' + window.__CODEXMAP_TOKEN__;
+          }
+        }
+        return originalFetch(input, init);
+      };
+
+      const OriginalWebSocket = window.WebSocket;
+      window.WebSocket = function(url, protocols) {
+        if (typeof url === 'string' && (url.startsWith('ws://') || url.startsWith('wss://')) && window.__CODEXMAP_TOKEN__) {
+          try {
+            const urlObj = new URL(url);
+            urlObj.searchParams.set('token', window.__CODEXMAP_TOKEN__);
+            url = urlObj.toString();
+          } catch (e) {
+            console.error('[SECURITY] Failed to append auth token to WebSocket URL:', e);
+          }
+        }
+        return new OriginalWebSocket(url, protocols);
+      };
+      // Copy static properties and prototype for complete compatibility
+      for (const key of Object.getOwnPropertyNames(OriginalWebSocket)) {
+        if (key !== 'prototype' && key !== 'name' && key !== 'length') {
+          window.WebSocket[key] = OriginalWebSocket[key];
+        }
+      }
+      window.WebSocket.prototype = OriginalWebSocket.prototype;
+      Object.setPrototypeOf(window.WebSocket, OriginalWebSocket);
+    })();
+  </script>
+  
+  <!-- Font Preconnects (faster than CSS @import) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.cdnfonts.com/css/roobert" rel="stylesheet">
+  <script>
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const wsUrl = params.get('ws');
+      const reanchorUrl = params.get('reanchor');
+
+      window.CODEXMAP_WS_URL = wsUrl || null;
+      window.CODEXMAP_REANCHOR_URL = reanchorUrl || '/api/reheal';
+
+      if (wsUrl) {
+        try {
+          const parsed = new URL(wsUrl);
+          window.CODEXMAP_WS_PORT = parsed.port ? parseInt(parsed.port, 10) : (window.CODEXMAP_WS_PORT || 4242);
+        } catch (error) {
+          console.warn('[INDEX] Invalid ws query param, falling back to port ' + (window.CODEXMAP_WS_PORT || 4242));
+          window.CODEXMAP_WS_PORT = window.CODEXMAP_WS_PORT || 4242;
+          window.CODEXMAP_WS_URL = null;
+        }
+      } else {
+        window.CODEXMAP_WS_PORT = window.CODEXMAP_WS_PORT || 4242;
+      }
+    })();
+  </script>
+
+  <!-- Miro Design Tokens & Base Styles -->
+  <link rel="stylesheet" href="styles/variables.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/toolbar.css">
+  <link rel="stylesheet" href="styles/toolbar-bottom.css">
+  <link rel="stylesheet" href="styles/sidebar.css">
+  <link rel="stylesheet" href="styles/canvas.css">
+  <link rel="stylesheet" href="styles/panel.css">
+  <link rel="stylesheet" href="styles/tooltips.css">
+  <link rel="stylesheet" href="styles/nodes.css">
+  <link rel="stylesheet" href="styles/workspace-redesign.css">
+  
+</head>
+<body>
+  <div id="app">
+    <!-- Floating Command Bar -->
+    <header id="toolbar">
+      <div class="toolbar-left">
+        <button id="sidebar-toggle" class="icon-btn" title="Toggle drift intelligence panel" aria-label="Toggle drift intelligence panel">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="logo-hexagon">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 2L29.8564 10V26L16 34L2.14359 26V10L16 2Z" fill="#5B76FE"/>
+          </svg>
+        </div>
+        <span class="brand roobert">CodexMap</span>
+        <span class="project-name noto" id="project-display">...</span>
+      </div>
+      
+      <div class="toolbar-center">
+        <div id="drift-pill" class="drift-pill grade-a-chip roobert" title="Average semantic alignment across scored nodes">
+          <span class="pill-label">Drift</span>
+          <span id="drift-score-value">100%</span>
+        </div>
+        <div id="sentinel-status" class="sentinel-status roobert">
+           <span id="node-count">0 nodes</span>
+        </div>
+        <button id="incident-trigger" class="incident-trigger roobert" title="Open drift incident drawer">
+          <span id="incident-trigger-count">0</span>
+          Incident
+        </button>
+        <div class="status-group">
+          <div id="status-dot" class="status-dot idle"></div>
+          <span id="status-text" class="noto">Idle</span>
+        </div>
+
+        <div class="auto-heal-group">
+          <span class="toggle-label roobert">Auto-Heal</span>
+          <label class="switch">
+            <input type="checkbox" id="auto-heal-toggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="toolbar-right">
+        <div id="breadcrumb" class="breadcrumb mono" title="Selected node">No node selected</div>
+        <div id="conn-status" class="conn-status roobert" title="Connection Status">
+           <span class="conn-dot"></span>
+           <span id="conn-status-text" class="conn-text">Syncing</span>
+        </div>
+        <div class="agent-pills">
+          <div id="pill-cartographer" class="agent-pill" data-agent="cartographer" title="Cartographer">C</div>
+          <div id="pill-broadcaster" class="agent-pill" data-agent="broadcaster" title="Broadcaster">B</div>
+          <div id="pill-sentinel" class="agent-pill" data-agent="sentinel" title="Sentinel">S</div>
+          <div id="pill-generator" class="agent-pill" data-agent="generator" title="Codex Generator">
+            <svg width="12" height="12" viewBox="0 0 32 32" fill="currentColor">
+              <path d="M16 2L29.8564 10V26L16 34L2.14359 26V10L16 2Z"/>
+            </svg>
+          </div>
+        </div>
+        <button id="help-shortcuts" class="btn-share roobert">Shortcuts</button>
+      </div>
+    </header>
+
+    <!-- Architectural Collapse Warning -->
+    <div id="collapse-banner" hidden>
+      <div class="banner-content">
+        <span id="collapse-banner-text">Architectural collapse risk detected.</span>
+        <button class="btn-primary" onclick="window.CodexGraph?.setViewMode('drift')">Review drift</button>
+        <button class="banner-close" id="collapse-dismiss" aria-label="Dismiss collapse warning">x</button>
+      </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <main id="workspace">
+      <!-- Left Sidebar: Timeline & Feed -->
+      <aside id="sidebar-left">
+        <div class="drawer-header">
+          <div>
+            <p class="eyebrow">Drift Intelligence</p>
+            <h2 class="drawer-title roobert">Session health</h2>
+          </div>
+          <button id="sidebar-collapse" class="drawer-close" aria-label="Collapse sidebar">-</button>
+        </div>
+
+        <section class="sidebar-section overview-cards">
+          <article class="metric-card metric-drift">
+            <span class="metric-label">Alignment</span>
+            <strong id="drawer-drift-score">100%</strong>
+            <small id="drawer-drift-copy">Waiting for scores</small>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Visible</span>
+            <strong id="visible-node-count">0</strong>
+            <small>nodes on canvas</small>
+          </article>
+        </section>
+
+        <section class="sidebar-section incident-summary-card">
+          <div>
+            <p class="panel-kicker">Drift Incident</p>
+            <h3 id="incident-drawer-headline">No critical drift</h3>
+            <p id="incident-drawer-copy">Red and critical-yellow nodes will appear here when repair is useful.</p>
+          </div>
+          <button id="open-incident-from-drawer" class="incident-drawer-cta">Review incident</button>
+        </section>
+
+        <section class="sidebar-section grade-filter-section">
+          <div class="section-header">
+            <h3 class="section-title roobert">Grade Filters</h3>
+            <button id="clear-grade-filters" class="text-btn">Reset</button>
+          </div>
+          <div class="grade-filter-grid">
+            <button class="grade-filter active" data-grade-filter="green"><span></span>Green <b id="count-green">0</b></button>
+            <button class="grade-filter active" data-grade-filter="yellow"><span></span>Yellow <b id="count-yellow">0</b></button>
+            <button class="grade-filter active" data-grade-filter="red"><span></span>Red <b id="count-red">0</b></button>
+            <button class="grade-filter active" data-grade-filter="pending"><span></span>Pending <b id="count-pending">0</b></button>
+          </div>
+        </section>
+
+        <section class="sidebar-section">
+          <div class="section-header">
+            <h3 class="section-title roobert">Session Drift</h3>
+            <span id="drift-trend-label" class="trend-label">stable</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="drift-canvas" width="280" height="132"></canvas>
+          </div>
+          <div id="drift-insights" class="drift-insights">No inflection points yet.</div>
+        </section>
+
+        <section class="sidebar-section compact-section">
+          <h3 class="section-title roobert">API Cost</h3>
+          <div id="api-cost-widget" class="noto" style="font-size:12px; color:#A5A8B5;">
+            Tokens: <span id="api-tokens">0</span><br>
+            Cost: $<span id="api-cost">0.0000</span>
+          </div>
+        </section>
+
+        <section class="sidebar-section compact-section">
+          <div class="section-header">
+            <h3 class="section-title roobert">Score Components</h3>
+            <span class="info-trigger">?</span>
+          </div>
+          <div id="score-table-container">
+            <!-- Table injected by JS -->
+          </div>
+        </section>
+
+        <section class="sidebar-section feed-section">
+          <h3 class="section-title roobert">Agent Activity</h3>
+          <div id="agent-logs-container" class="feed-container">
+            <!-- Logs injected by JS -->
+          </div>
+        </section>
+      </aside>
+
+      <!-- Central Canvas -->
+      <div id="canvas-container" style="position: relative; flex: 1; min-width: 0; min-height: 0;">
+        <!-- Shimmer skeletons injected by JS -->
+        <div id="error-overlay" style="position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:50;background:rgba(255,255,255,0.6);backdrop-filter:blur(2px);"></div>
+        <div id="canvas-empty-state" class="canvas-empty-state" hidden>
+          <div class="empty-card">
+            <span class="empty-kicker">Live code map</span>
+            <h2>Waiting for generated files</h2>
+            <p>CodexMap will place files here as Codex writes them. Use Overview first, then zoom into functions when drift appears.</p>
+          </div>
+        </div>
+        <div id="minimap" aria-label="Canvas minimap">
+          <div id="minimap-content"></div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Details -->
+      <aside id="panel-right" hidden>
+        <!-- Content injected by panel.js -->
+      </aside>
+    </main>
+
+    <!-- Bottom Toolbar -->
+    <footer id="toolbar-bottom">
+      <div class="footer-left">
+        <input type="text" id="node-search" class="noto" placeholder="Search nodes...">
+      </div>
+      
+      <div class="footer-center roobert">
+        <div class="view-mode-group" role="group" aria-label="Graph view mode">
+          <button class="footer-btn view-mode active" data-view-mode="overview">Overview</button>
+          <button class="footer-btn view-mode" data-view-mode="files">Files</button>
+          <button class="footer-btn view-mode" data-view-mode="functions">Functions</button>
+          <button class="footer-btn view-mode" data-view-mode="drift">Drift Only</button>
+          <button class="footer-btn view-mode" data-view-mode="critical">Critical Path</button>
+        </div>
+        <div class="divider"></div>
+        <button id="btn-fit" class="footer-btn">Fit View</button>
+        <div class="divider"></div>
+        <button id="btn-zoom-in" class="footer-btn">+</button>
+        <span id="zoom-level">100%</span>
+        <button id="btn-zoom-out" class="footer-btn">−</button>
+      </div>
+      
+      <div class="footer-right roobert">
+        <button id="btn-layout" class="footer-btn">Layout</button>
+        <button id="btn-fit-drift" class="footer-btn">Fit Drift</button>
+        <button class="footer-btn">Settings</button>
+      </div>
+    </footer>
+
+
+<div id="incident-backdrop" hidden></div>
+    <aside id="incident-drawer" hidden aria-label="Drift incident drawer">
+      <div class="incident-header">
+        <div>
+          <p class="eyebrow">Drift incident</p>
+          <h2 class="roobert">Repair cockpit</h2>
+          <p id="incident-recommendation">No critical drift detected.</p>
+        </div>
+        <button id="incident-close" class="btn-close" aria-label="Close incident drawer">x</button>
+      </div>
+
+      <div class="incident-metrics">
+        <article>
+          <span>Risky files</span>
+          <strong id="incident-risky-count">0</strong>
+        </article>
+        <article>
+          <span>Red</span>
+          <strong id="incident-red-count">0</strong>
+        </article>
+        <article>
+          <span>Critical yellow</span>
+          <strong id="incident-yellow-count">0</strong>
+        </article>
+        <article>
+          <span>In queue</span>
+          <strong id="incident-queue-count">0</strong>
+        </article>
+      </div>
+
+      <div class="incident-tabs" role="tablist" aria-label="Incident sections">
+        <button class="active" data-incident-tab="risky">Risky Nodes</button>
+        <button data-incident-tab="queue">Repair Queue</button>
+        <button data-incident-tab="history">History</button>
+      </div>
+
+      <div id="incident-body" class="incident-body"></div>
+    </aside>
+
+    <div id="canvas-toast" class="canvas-toast" hidden></div>
+
+    <div id="shortcuts-overlay" hidden>
+      <div class="shortcuts-card">
+        <button id="shortcuts-close" class="btn-close">x</button>
+        <p class="eyebrow">Workspace shortcuts</p>
+        <h2 class="roobert">Move through the map faster</h2>
+        <div class="shortcut-grid">
+          <span>/</span><p>Focus search</p>
+          <span>1</span><p>Overview mode</p>
+          <span>2</span><p>Files mode</p>
+          <span>3</span><p>Functions mode</p>
+          <span>D</span><p>Drift-only mode</p>
+          <span>C</span><p>Critical path mode</p>
+          <span>F</span><p>Fit visible graph</p>
+          <span>Esc</span><p>Close panel or dialog</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connection Error Overlay -->
+    <div id="conn-error-overlay" hidden>
+      <div class="overlay-card roobert">
+        <div class="overlay-icon">📡</div>
+        <h2>Connection Lost</h2>
+        <p>The CodexMap engine is unreachable. Ensure the orchestrator is running.</p>
+        <button class="btn-primary" onclick="window.location.reload()">Retry Connection</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
+  <script src="https://unpkg.com/layout-base/layout-base.js"></script>
+  <script src="https://unpkg.com/cose-base/cose-base.js"></script>
+  <script src="https://unpkg.com/cytoscape-fcose/cytoscape-fcose.js"></script>
+  <script src="ui-state.js"></script>
+  <script src="graph.js"></script>
+  <script src="ws.js"></script>
+  <script src="drift-timeline.js"></script>
+  <script src="activity-feed.js"></script>
+  <script src="panel.js"></script>
+  <script src="onboarding.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectName = urlParams.get('project') || 'DefaultProject';
+    document.getElementById('project-display').textContent = projectName;
+
+    // --- Production Polish Pass ---
+    window.updateDriftScoreBadge = (score) => {
+      const val = document.getElementById('drift-score-value');
+      const pill = document.getElementById('drift-pill');
+      const drawerVal = document.getElementById('drawer-drift-score');
+      const drawerCopy = document.getElementById('drawer-drift-copy');
+      if (!val || !pill) return;
+
+      // Handle both 0-1 and 0-100 ranges
+      let pct = Math.round(score);
+      if (score <= 1.0) pct = Math.round(score * 100);
+
+      val.textContent = `${pct}%`;
+      if (drawerVal) drawerVal.textContent = `${pct}%`;
+      if (drawerCopy) {
+        drawerCopy.textContent = pct >= 80
+          ? 'Strong alignment'
+          : pct >= 50
+            ? 'Review recommended'
+            : 'Critical drift risk';
+      }
+      pill.className = 'drift-pill roobert';
+      if (pct >= 80) pill.classList.add('grade-a-chip');
+      else if (pct >= 50) pill.classList.add('grade-c-chip');
+      else pill.classList.add('grade-f-chip');
+    };
+
+    window.updateAgentPill = (agent, state) => {
+      const pill = document.querySelector(`[data-agent="${agent}"]`);
+      if (!pill) return;
+      pill.classList.toggle('active', state === 'active');
+    };
+
+    document.getElementById('node-search')?.addEventListener('input', (e) => {
+      window.CodexGraph?.search(e.target.value);
+    });
+
+    window.triggerFullReanchor = function triggerFullReanchor() {
+      if (window.CodexWS) window.CodexWS.send({ type: 'full_reanchor' });
+    };
+
+    window.handleCollapseWarning = function(payload) {
+      window.CodexUI?.handleCollapseWarning(payload);
+    };
+
+    // --- Auto-Heal Toggle Logic ---
+    const healToggle = document.getElementById('auto-heal-toggle');
+    healToggle?.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      console.log(`[UI] Toggling Auto-Heal: ${enabled}`);
+      if (window.CodexWS) {
+        window.CodexWS.send({ type: 'set_autoheal', enabled });
+      }
+    });
+
+    window.updateSettingsUI = (settings) => {
+      if (healToggle) {
+        healToggle.checked = !!settings.autoHeal;
+        console.log(`[UI] Settings synced: autoHeal=${settings.autoHeal}`);
+      }
+    };
+  </script>
+</body>
+</html>

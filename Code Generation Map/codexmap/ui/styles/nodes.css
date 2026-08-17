@@ -1,0 +1,68 @@
+/* Node Grade Chips */
+.grade-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 600;
+  border: 1.5px solid transparent;
+}
+
+.grade-chip.grade-green {
+  background-color: #c3faf5;
+  color: #187574;
+  border-color: #187574;
+}
+
+.grade-chip.grade-yellow {
+  background-color: #ffe6cd;
+  color: #746019;
+  border-color: #d4850a;
+}
+
+.grade-chip.grade-red {
+  background-color: #ffc6c6;
+  color: #600000;
+  border-color: #600000;
+}
+
+.grade-chip.grade-pending {
+  background-color: #f0f0f0;
+  color: #a5a8b5;
+  border-color: #c7cad5;
+}
+
+/* Code Previews */
+.code-preview.grade-green-bg {
+  background-color: #c3faf530;
+  border-color: #187574;
+}
+
+.code-preview.grade-yellow-bg {
+  background-color: #ffe6cd30;
+  border-color: #d4850a;
+}
+
+.code-preview.grade-red-bg {
+  background-color: #ffc6c630;
+  border-color: #600000;
+}
+
+.code-preview.grade-pending-bg {
+  background-color: #f0f0f030;
+  border-color: #c7cad5;
+}
+
+/* 4px colored left border for node cards - if rendered as HTML */
+.node-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  border-left: 4px solid transparent;
+}
+
+.node-card.green { border-left-color: #187574; }
+.node-card.yellow { border-left-color: #d4850a; }
+.node-card.red { border-left-color: #600000; }

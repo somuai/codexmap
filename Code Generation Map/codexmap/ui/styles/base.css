@@ -1,0 +1,120 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-near-black);
+  background-color: var(--color-white);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::selection {
+  background: rgba(91, 118, 254, 0.12);
+}
+
+/* Layout Utilities */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+#workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Typography Helper Classes */
+.roobert { font-family: var(--font-display); }
+.noto { font-family: var(--font-body); }
+.ibm-mono { font-family: var(--font-mono); }
+
+/* Apply Roobert to all headings, labels, buttons, badges */
+h1, h2, h3, h4,
+.panel-title, .section-header, .agent-name,
+button, .grade-chip, .agent-pill, .score-label,
+#toolbar, #toolbar-bottom,
+.brand, .btn-share, .section-title,
+.drift-pill, .footer-btn {
+  font-family: var(--font-display);
+}
+
+/* Apply IBM Plex Mono to all code/path elements */
+pre, code, .mono, .node-path, .panel-meta,
+.feed-time, .chart-label, .score-value {
+  font-family: var(--font-mono);
+}
+
+/* Grade background classes for code previews and chips */
+.grade-green-bg { background-color: var(--grade-green-bg); color: var(--grade-green-text); border: 1px solid var(--grade-green-border); }
+.grade-yellow-bg { background-color: var(--grade-yellow-bg); color: var(--grade-yellow-text); border: 1px solid var(--grade-yellow-border); }
+.grade-red-bg { background-color: var(--grade-red-bg); color: var(--grade-red-text); border: 1px solid var(--grade-red-border); }
+.grade-pending-bg { background-color: var(--grade-pending-bg); color: var(--grade-pending-text); border: 1px solid var(--grade-pending-border); }
+
+/* Grade fill classes for progress bars */
+.grade-green-fill { background-color: #187574; }
+.grade-yellow-fill { background-color: #d4850a; }
+.grade-red-fill { background-color: #600000; }
+.grade-pending-fill { background-color: #c7cad5; }
+.coral-fill { background-color: #ffc6c6; }
+
+/* Shimmer animation for score bars awaiting data */
+.score-shimmer {
+  background: linear-gradient(90deg,
+    rgb(224,226,232) 25%,
+    rgb(200,202,210) 50%,
+    rgb(224,226,232) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-score 1.5s infinite;
+}
+@keyframes shimmer-score {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Button classes */
+.btn-primary { background-color: var(--color-blue-450); color: white; font-weight: var(--fw-btn); border-radius: var(--radius-btn); }
+.btn-danger { background-color: var(--color-coral-dark); color: white; font-weight: var(--fw-btn); border-radius: var(--radius-btn); }
+.btn-ghost { background-color: transparent; color: var(--color-near-black); }
+
+.section-divider {
+  height: 1px;
+  background-color: var(--color-border);
+  margin: 16px 0;
+  width: 100%;
+}

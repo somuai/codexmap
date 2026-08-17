@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "skills": {
+    "aws-diagrams": {
+      "source": "eraserlabs/eraser-io",
+      "sourceType": "github",
+      "skillPath": "skills/aws-diagrams/SKILL.md",
+      "computedHash": "4039a606e65c7f3c773fca639dbcd0814efe580a2dae15c8a73a3e9e02439b1f"
+    },
+    "azure-diagrams": {
+      "source": "eraserlabs/eraser-io",
+      "sourceType": "github",
+      "skillPath": "skills/azure-diagrams/SKILL.md",
+      "computedHash": "2f171403353254bc5c71d7abf94aeea97380bf7e0c5708861f8deadf141e7221"
+    },
+    "bicep-diagrams": {
+      "source": "eraserlabs/eraser-io",
+      "sourceType": "github",
+      "skillPath": "skills/bicep-diagrams/SKILL.md",
+      "computedHash": "c63c98845ae1c3e81ffa93e73e05dc2e4c352d191763f7d9b2a389c309e0321e"
+    },
+    "eraser-diagrams": {
+      "source": "eraserlabs/eraser-io",
+      "sourceType": "github",
+      "skillPath": "skills/eraser-diagrams/SKILL.md",
+      "computedHash": "6c14b60c461d8b290caa9e82dd42239b9b03c045edbdc7ded3bffea65ba8ad43"
+    },
+    "terraform-diagrams": {
+      "source": "eraserlabs/eraser-io",
+      "sourceType": "github",
+      "skillPath": "skills/terraform-diagrams/SKILL.md",
+      "computedHash": "8c2170299c39463fbd7ecd5e6b8f29f62aa5387d24b7c8cc3de931150d6c6a80"
+    }
+  }
+}

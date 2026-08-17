@@ -1,0 +1,269 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-near-black);
+  background-color: var(--color-white);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::selection {
+  background: rgba(91, 118, 254, 0.12);
+}
+
+/* Layout Utilities */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+#workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Typography Helper Classes */
+.roobert { font-family: var(--font-display); }
+.noto { font-family: var(--font-body); }
+.ibm-mono { font-family: var(--font-mono); }
+
+/* Apply Roobert to all headings, labels, buttons, badges */
+h1, h2, h3, h4,
+.panel-title, .section-header, .agent-name,
+button, .grade-chip, .agent-pill, .score-label,
+#toolbar, #toolbar-bottom,
+.brand, .btn-share, .section-title,
+.drift-pill, .footer-btn {
+  font-family: var(--font-display);
+}
+
+/* Apply IBM Plex Mono to all code/path elements */
+pre, code, .mono, .node-path, .panel-meta,
+.feed-time, .chart-label, .score-value {
+  font-family: var(--font-mono);
+}
+
+/* Grade background classes for code previews and chips */
+.grade-green-bg { background-color: var(--grade-green-bg); color: var(--grade-green-text); border: 1px solid var(--grade-green-border); }
+.grade-yellow-bg { background-color: var(--grade-yellow-bg); color: var(--grade-yellow-text); border: 1px solid var(--grade-yellow-border); }
+.grade-red-bg { background-color: var(--grade-red-bg); color: var(--grade-red-text); border: 1px solid var(--grade-red-border); }
+.grade-pending-bg { background-color: var(--grade-pending-bg); color: var(--grade-pending-text); border: 1px solid var(--grade-pending-border); }
+
+/* Grade fill classes for progress bars */
+.grade-green-fill { background-color: #187574; }
+.grade-yellow-fill { background-color: #d4850a; }
+.grade-red-fill { background-color: #600000; }
+.grade-pending-fill { background-color: #c7cad5; }
+.coral-fill { background-color: #ffc6c6; }
+
+/* Shimmer animation for score bars awaiting data */
+.score-shimmer {
+  background: linear-gradient(90deg,
+    rgb(224,226,232) 25%,
+    rgb(200,202,210) 50%,
+    rgb(224,226,232) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-score 1.5s infinite;
+}
+@keyframes shimmer-score {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Button classes */
+.btn-primary { background-color: var(--color-blue-450); color: white; font-weight: var(--fw-btn); border-radius: var(--radius-btn); }
+.btn-danger { background-color: var(--color-coral-dark); color: white; font-weight: var(--fw-btn); border-radius: var(--radius-btn); }
+.btn-ghost { background-color: transparent; color: var(--color-near-black); }
+
+.section-divider {
+  height: 1px;
+  background-color: var(--color-border);
+  margin: 16px 0;
+  width: 100%;
+}
+
+/* ---CANVAS--- */
+#canvas-container {
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+  background-image: radial-gradient(
+    circle, 
+    rgba(0, 0, 0, 0.08) 1px, 
+    transparent 1px
+  );
+  background-size: 24px 24px;
+  background-position: 0 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Force Cytoscape canvas to be transparent so dot grid shows through */
+#canvas-container canvas {
+  background: transparent !important;
+}
+
+/* Shimmer Skeleton */
+.skeleton-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 180px);
+  grid-template-rows: repeat(auto-fill, 100px);
+  gap: 40px;
+  padding: 60px;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.skeleton-rect {
+  width: 160px;
+  height: 80px;
+  background-color: var(--color-ring);
+  border-radius: var(--radius-card);
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-rect::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shimmer 1.5s infinite;
+  transform: translateX(-100%);
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+/* Empty State */
+.empty-state {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  max-width: 400px;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.empty-title {
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--color-near-black);
+}
+
+.empty-desc {
+  font-size: 16px;
+  color: var(--color-slate);
+}
+
+.empty-code {
+  padding: 12px 20px;
+  background-color: var(--color-ring);
+  border-radius: var(--radius-card);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--color-near-black);
+  margin-top: 8px;
+}
+
+/* Tooltip */
+.codex-tooltip {
+  position: fixed;
+  background: #1c1c1e;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  z-index: 500;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  max-width: 260px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.codex-tooltip.visible {
+  opacity: 1;
+}
+
+.tooltip-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.tooltip-meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #a5a8b5;
+  margin-bottom: 2px;
+}
+
+.tooltip-grade {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.grade-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}

@@ -1,0 +1,205 @@
+/* 
+ * Miro Design System Tokens for CodexMap
+ * Fonts loaded via <link> tags in index.html for performance.
+ */
+
+:root {
+  /* Core Miro Colors */
+  --color-near-black: #1c1c1e;
+  --color-blue-450: #5b76fe;
+  --color-blue-pressed: #2a41b6;
+  --color-success: #00b473;
+  --color-border: #c7cad5;
+  --color-ring: rgb(224,226,232);
+  --color-slate: #555a6a;
+  --color-placeholder: #a5a8b5;
+  --color-white: #ffffff;
+
+  /* Pastel Pairs from DESIGN.md */
+  --color-coral-light: #ffc6c6;
+  --color-coral-dark: #600000;
+  --color-rose-light: #ffd8f4;
+  --color-teal-light: #c3faf5;
+  --color-teal-dark: #187574;
+  --color-orange-light: #ffe6cd;
+  --color-orange-dark: #d4850a;
+  --color-yellow-dark: #746019;
+  --color-moss-dark: #187574;
+  --color-pink: #fde0f0;
+  --color-red-light: #fbd4d4;
+  --color-red-muted: #e3c5c5;
+
+  /* Grade Mappings */
+  --grade-green-bg: var(--color-teal-light);
+  --grade-green-text: var(--color-teal-dark);
+  --grade-green-border: var(--color-teal-dark);
+
+  --grade-yellow-bg: var(--color-orange-light);
+  --grade-yellow-text: var(--color-yellow-dark);
+  --grade-yellow-border: #d4850a;
+
+  --grade-red-bg: var(--color-coral-light);
+  --grade-red-text: var(--color-coral-dark);
+  --grade-red-border: var(--color-coral-dark);
+
+  --grade-pending-bg: #f0efe9;
+  --grade-pending-text: var(--color-placeholder);
+  --grade-pending-border: var(--color-border);
+
+  /* Shadow Tokens */
+  --shadow-ring: var(--color-ring) 0px 0px 0px 1px;
+  --shadow-card: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-panel: -8px 0 24px rgba(0,0,0,0.08);
+  --shadow-toolbar: 0 2px 12px rgba(0,0,0,0.08);
+
+  /* Radius Tokens */
+  --radius-btn: 8px;
+  --radius-card: 12px;
+  --radius-panel: 20px;
+  --radius-pill: 50px;
+
+  /* Typography Scale */
+  --font-display: 'Roobert PRO Medium', 'Roobert', 'Inter', sans-serif;
+  --font-body: 'Noto Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+  /* 11 Levels from DESIGN.md */
+  --fs-hero: 56px;      --lh-hero: 1.15; --ls-hero: -1.68px;
+  --fs-h1: 48px;        --lh-h1: 1.15;   --ls-h1: -1.44px;
+  --fs-h2: 24px;        --lh-h2: 1.15;   --ls-h2: -0.72px;
+  --fs-subhead: 22px;   --lh-subhead: 1.35; --ls-subhead: -0.44px;
+  --fs-feature: 18px;   --lh-feature: 1.35; --fw-feature: 600;
+  --fs-body: 18px;      --lh-body: 1.45;
+  --fs-std: 16px;       --lh-std: 1.50;  --ls-std: -0.16px;
+  --fs-btn: 17.5px;     --lh-btn: 1.29;  --ls-btn: 0.175px; --fw-btn: 700;
+  --fs-caption: 14px;   --lh-caption: 1.71;
+  --fs-small: 12px;     --lh-small: 1.15; --ls-small: -0.36px;
+  --fs-micro: 10.5px;   --lh-micro: 0.90;
+}
+/* Node Grade Chips */
+.grade-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 600;
+  border: 1.5px solid transparent;
+}
+
+.grade-chip.grade-green {
+  background-color: #c3faf5;
+  color: #187574;
+  border-color: #187574;
+}
+
+.grade-chip.grade-yellow {
+  background-color: #ffe6cd;
+  color: #746019;
+  border-color: #d4850a;
+}
+
+.grade-chip.grade-red {
+  background-color: #ffc6c6;
+  color: #600000;
+  border-color: #600000;
+}
+
+.grade-chip.grade-pending {
+  background-color: #f0f0f0;
+  color: #a5a8b5;
+  border-color: #c7cad5;
+}
+
+/* Code Previews */
+.code-preview.grade-green-bg {
+  background-color: #c3faf530;
+  border-color: #187574;
+}
+
+.code-preview.grade-yellow-bg {
+  background-color: #ffe6cd30;
+  border-color: #d4850a;
+}
+
+.code-preview.grade-red-bg {
+  background-color: #ffc6c630;
+  border-color: #600000;
+}
+
+.code-preview.grade-pending-bg {
+  background-color: #f0f0f030;
+  border-color: #c7cad5;
+}
+
+/* 4px colored left border for node cards - if rendered as HTML */
+.node-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  border-left: 4px solid transparent;
+}
+
+.node-card.green { border-left-color: #187574; }
+.node-card.yellow { border-left-color: #d4850a; }
+.node-card.red { border-left-color: #600000; }
+.codex-tooltip {
+  position: fixed;
+  z-index: 1000;
+  background-color: var(--color-near-black);
+  color: white;
+  border-radius: 8px;
+  padding: 10px 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.20);
+  pointer-events: none;
+  font-family: var(--font-body);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 140px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.codex-tooltip.visible {
+  opacity: 1;
+}
+
+.tooltip-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.tooltip-meta {
+  font-size: 13px;
+  color: var(--color-placeholder);
+}
+
+.tooltip-grade {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.grade-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.codex-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -6px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: var(--color-near-black) transparent transparent transparent;
+}
