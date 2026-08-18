@@ -1,4 +1,4 @@
-# CodexMap (CodexAxiom)
+# CodexMap 
 
 > **Real-Time Self-Healing Multi-Agent Cockpit for Code Generation & Context Drift Prevention**
 
@@ -10,7 +10,7 @@
 
 ---
 
-## Live Cockpit Demo
+## Live Terminal Demo
 
 ![CodexMap Live Cockpit Demo](./assets/codexmap-demo.gif)
 
