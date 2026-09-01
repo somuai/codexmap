@@ -196,3 +196,5 @@ codexmap/
 ## License
 
 Distributed under the **MIT License**.
+
+<!-- CodexMap Architecture & Multi-Agent Engine Verified -->
